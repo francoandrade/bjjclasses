@@ -1,0 +1,76 @@
+/* Fonts */
+@font-face {
+  font-family: 'Nofex';
+  src: url('/fonts/nofex-regular.woff2') format('woff2'),
+       url('/fonts/nofex-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* CSS Variables */
+:root {
+  --grey-50: #adadad;
+  --grey-100: #878787;
+  --grey-200: #434343;
+  --grey-300: #292929;
+  --white: #ffffff;
+  
+  --font-mono: 'Ubuntu Mono', 'Courier New', monospace;
+  --font-serif: 'Nofex', Georgia, 'Times New Roman', serif;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-mono);
+  background-color: var(--white);
+  color: var(--grey-300);
+  line-height: 1.6;
+}
+
+/* Typography */
+ul, ol {
+  list-style-position: outside;
+  margin-left: 24px;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+ol[type="a"] {
+  list-style-type: lower-alpha;
+  margin-left: 48px;
+}
+
+li {
+  line-height: 26px;
+  margin-bottom: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
