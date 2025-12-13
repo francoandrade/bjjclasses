@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ClassPost from '../components/ClassPost.astro';
 import { getCollection, render } from 'astro:content';
 
 // Get all class notes, sorted by date (newest first)
@@ -11,60 +10,68 @@ const sortedClasses = allClasses.sort((a, b) => {
   return dateB.getTime() - dateA.getTime();
 });
 
-// Get the latest class for display
-const latestClass = sortedClasses[0];
-const { Content } = await render(latestClass);
+// Render all classes
+const renderedClasses = await Promise.all(
+  sortedClasses.map(async (classNote) => {
+    const { Content } = await render(classNote);
+    return { ...classNote, Content };
+  })
+);
 ---
 
-<Layout title={`${latestClass.data.title} | BJJ Classes`}>
+<Layout title="BJJ Classes">
   <div class="page">
     <div class="container">
       <header class="header">
         <img src="/logo.svg" alt="BJJ Classes - Franco Andrade" class="logo" />
       </header>
       
-      <article class="post">
-      <aside class="left-sidebar">
-        <a href={`https://www.youtube.com/watch?v=${latestClass.data.youtubeId}`} target="_blank" rel="noopener noreferrer" class="thumbnail-container">
-          <img 
-            src={`https://img.youtube.com/vi/${latestClass.data.youtubeId}/maxresdefault.jpg`}
-            alt={latestClass.data.title}
-            class="thumbnail"
-            loading="lazy"
-          />
-          <div class="play-overlay">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="24" r="24" fill="rgba(0,0,0,0.6)" />
-              <path d="M19 15L33 24L19 33V15Z" fill="white" />
-            </svg>
-          </div>
-        </a>
-        
-        {latestClass.data.references && latestClass.data.references.length > 0 && (
-          <nav class="references">
-            {latestClass.data.references.map((ref) => (
-              <a href={ref.url} target="_blank" rel="noopener noreferrer" class="external-link">
-                <span class="link-text">{ref.title}</span>
-                <svg class="link-icon" width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 2H2V12H12V10M8 2H12M12 2V6M12 2L6 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+      <div class="posts">
+        {renderedClasses.map(({ data, Content }) => (
+          <article class="post">
+            <aside class="left-sidebar">
+              <a href={`https://www.youtube.com/watch?v=${data.youtubeId}`} target="_blank" rel="noopener noreferrer" class="thumbnail-container">
+                <img 
+                  src={`https://img.youtube.com/vi/${data.youtubeId}/maxresdefault.jpg`}
+                  alt={data.title}
+                  class="thumbnail"
+                  loading="lazy"
+                />
+                <div class="play-overlay">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="24" fill="rgba(0,0,0,0.6)" />
+                    <path d="M19 15L33 24L19 33V15Z" fill="white" />
+                  </svg>
+                </div>
               </a>
-            ))}
-          </nav>
-        )}
-      </aside>
-      
-      <main class="main-content">
-        <header class="post-header">
-          <time class="post-date">{latestClass.data.date}</time>
-          <h1 class="post-title">{latestClass.data.title}</h1>
-        </header>
-        
-        <div class="post-content">
-          <Content />
-        </div>
-      </main>
-    </article>
+              
+              {data.references && data.references.length > 0 && (
+                <nav class="references">
+                  {data.references.map((ref) => (
+                    <a href={ref.url} target="_blank" rel="noopener noreferrer" class="external-link">
+                      <span class="link-text">{ref.title}</span>
+                      <svg class="link-icon" width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 2H2V12H12V10M8 2H12M12 2V6M12 2L6 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  ))}
+                </nav>
+              )}
+            </aside>
+            
+            <main class="main-content">
+              <header class="post-header">
+                <time class="post-date">{data.date}</time>
+                <h2 class="post-title">{data.title}</h2>
+              </header>
+              
+              <div class="post-content">
+                <Content />
+              </div>
+            </main>
+          </article>
+        ))}
+      </div>
     </div>
   </div>
 </Layout>
@@ -90,6 +97,12 @@ const { Content } = await render(latestClass);
   .logo {
     width: 191px;
     height: auto;
+  }
+
+  .posts {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
   }
 
   .post {
