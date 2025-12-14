@@ -1,7 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$USER/public_html/bjj
-    - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -R dist/* $DEPLOYPATH/
-
+    - /bin/mkdir -p /home/$USER/public_html/bjj
+    - /bin/cp -R dist/* /home/$USER/public_html/bjj/
