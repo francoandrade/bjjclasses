@@ -29,8 +29,43 @@ const renderedClasses = await Promise.all(
       <div class="posts">
         {renderedClasses.map(({ data, Content }) => (
           <article class="post">
+            <main class="main-content">
+              <header class="post-header">
+                <time class="post-date">{data.date}</time>
+                <h2 class="post-title">{data.title}</h2>
+              </header>
+
+              {data.references && data.references.length > 0 && (
+                <details class="references-accordion">
+                  <summary class="accordion-trigger">
+                    <span class="accordion-label">Reference videos</span>
+                    <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </summary>
+                  <nav class="references">
+                    {data.references.map((ref) => (
+                      <a href={ref.url} target="_blank" rel="noopener noreferrer" class="external-link">
+                        <span class="link-text">{ref.title}</span>
+                      </a>
+                    ))}
+                  </nav>
+                </details>
+              )}
+              
+              <div class="post-content">
+                <Content />
+              </div>
+            </main>
+
             <aside class="left-sidebar">
-              <a href={`https://www.youtube.com/watch?v=${data.youtubeId}`} target="_blank" rel="noopener noreferrer" class="thumbnail-container">
+              <a 
+                href={`https://www.youtube.com/shorts/${data.youtubeId}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="thumbnail-container"
+                data-youtube-id={data.youtubeId}
+              >
                 <img 
                   src={`https://img.youtube.com/vi/${data.youtubeId}/maxresdefault.jpg`}
                   alt={data.title}
@@ -44,37 +79,85 @@ const renderedClasses = await Promise.all(
                   </svg>
                 </div>
               </a>
-              
-              {data.references && data.references.length > 0 && (
-                <nav class="references">
-                  {data.references.map((ref) => (
-                    <a href={ref.url} target="_blank" rel="noopener noreferrer" class="external-link">
-                      <span class="link-text">{ref.title}</span>
-                      <svg class="link-icon" width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 2H2V12H12V10M8 2H12M12 2V6M12 2L6 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </a>
-                  ))}
-                </nav>
-              )}
             </aside>
-            
-            <main class="main-content">
-              <header class="post-header">
-                <time class="post-date">{data.date}</time>
-                <h2 class="post-title">{data.title}</h2>
-              </header>
-              
-              <div class="post-content">
-                <Content />
-              </div>
-            </main>
           </article>
         ))}
       </div>
     </div>
   </div>
+
+  <!-- Video Modal -->
+  <div class="video-modal" id="videoModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close modal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="video-container">
+        <iframe 
+          id="videoIframe"
+          src="" 
+          title="YouTube video player" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </div>
 </Layout>
+
+<script>
+  // Only enable modal on desktop (screen width > 768px)
+  const isDesktop = () => window.innerWidth > 768;
+  
+  const modal = document.getElementById('videoModal');
+  const iframe = document.getElementById('videoIframe') as HTMLIFrameElement;
+  const backdrop = modal?.querySelector('.modal-backdrop');
+  const closeBtn = modal?.querySelector('.modal-close');
+  
+  // Calculate scrollbar width to prevent layout shift
+  const getScrollbarWidth = () => window.innerWidth - document.documentElement.clientWidth;
+  
+  // Handle thumbnail clicks
+  document.querySelectorAll('.thumbnail-container[data-youtube-id]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (!isDesktop()) return; // Let mobile users open in new tab
+      
+      e.preventDefault();
+      const youtubeId = (link as HTMLElement).dataset.youtubeId;
+      if (youtubeId && iframe && modal) {
+        const scrollbarWidth = getScrollbarWidth();
+        iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+    });
+  });
+  
+  // Close modal functions
+  const closeModal = () => {
+    if (modal && iframe) {
+      modal.classList.remove('active');
+      iframe.src = '';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+  };
+  
+  backdrop?.addEventListener('click', closeModal);
+  closeBtn?.addEventListener('click', closeModal);
+  
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+      closeModal();
+    }
+  });
+</script>
 
 <style>
   .page {
@@ -103,6 +186,8 @@ const renderedClasses = await Promise.all(
     display: flex;
     flex-direction: column;
     gap: 80px;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .post {
@@ -120,13 +205,18 @@ const renderedClasses = await Promise.all(
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-top: 32px;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .thumbnail-container {
     display: block;
     position: relative;
     width: 100%;
-    aspect-ratio: 300 / 169;
+    max-width: 180px;
+    aspect-ratio: 9 / 16;
     border-radius: 4px;
     overflow: hidden;
   }
@@ -151,35 +241,53 @@ const renderedClasses = await Promise.all(
     opacity: 1;
   }
 
+  .references-accordion {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .accordion-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--grey-100);
+    list-style: none;
+  }
+
+  .accordion-trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .accordion-label {
+    text-decoration: none;
+  }
+
+  .chevron {
+    color: var(--grey-50);
+    transition: transform 0.2s ease;
+  }
+
+  .references-accordion[open] .chevron {
+    transform: rotate(180deg);
+  }
+
   .references {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-top: 12px;
   }
 
   .external-link {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
+    display: block;
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--grey-100);
-    text-decoration: none;
-  }
-
-  .link-text {
-    flex: 1;
-    min-width: 0;
+    text-decoration: underline;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-decoration: underline;
-  }
-
-  .link-icon {
-    flex-shrink: 0;
-    color: var(--grey-50);
   }
 
   .external-link:hover {
@@ -247,5 +355,69 @@ const renderedClasses = await Promise.all(
 
   .post-content :global(p) {
     margin-bottom: 8px;
+  }
+
+  /* Video Modal */
+  .video-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .video-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(67, 67, 67, 0.7); /* grey-200 with 70% opacity */
+  }
+
+  .modal-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 90vh;
+    max-width: 90vw;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    padding: 8px;
+    transition: opacity 0.2s ease;
+  }
+
+  .modal-close:hover {
+    opacity: 0.7;
+  }
+
+  .video-container {
+    width: 360px;
+    max-width: 90vw;
+    aspect-ratio: 9 / 16;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .video-container iframe {
+    width: 100%;
+    height: 100%;
   }
 </style>

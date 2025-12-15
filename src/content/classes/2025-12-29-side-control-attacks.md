@@ -1,7 +1,7 @@
 ---
 date: "29 Dec 2025"
 title: "Side control attacks"
-youtubeId: "dQw4w9WgXcQ"
+youtubeId: "qEf81ZRiSzY"
 references:
   - title: "Marcelo Garcia side control attacks"
     url: "https://youtube.com/watch?v=example1"
