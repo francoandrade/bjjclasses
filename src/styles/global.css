@@ -1,8 +1,8 @@
 /* Fonts */
 @font-face {
   font-family: 'Nofex';
-  src: url('/fonts/nofex-regular.woff2') format('woff2'),
-       url('/fonts/nofex-regular.woff') format('woff');
+  src: url('/fonts/Nofex.woff') format('woff'),
+       url('/fonts/Nofex.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
