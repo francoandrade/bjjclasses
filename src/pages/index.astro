@@ -118,9 +118,6 @@ const renderedClasses = await Promise.all(
   const backdrop = modal?.querySelector('.modal-backdrop');
   const closeBtn = modal?.querySelector('.modal-close');
   
-  // Calculate scrollbar width to prevent layout shift
-  const getScrollbarWidth = () => window.innerWidth - document.documentElement.clientWidth;
-  
   // Handle thumbnail clicks
   document.querySelectorAll('.thumbnail-container[data-youtube-id]').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -129,11 +126,8 @@ const renderedClasses = await Promise.all(
       e.preventDefault();
       const youtubeId = (link as HTMLElement).dataset.youtubeId;
       if (youtubeId && iframe && modal) {
-        const scrollbarWidth = getScrollbarWidth();
         iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
         modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
       }
     });
   });
@@ -143,8 +137,6 @@ const renderedClasses = await Promise.all(
     if (modal && iframe) {
       modal.classList.remove('active');
       iframe.src = '';
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
     }
   };
   
@@ -166,6 +158,23 @@ const renderedClasses = await Promise.all(
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+  }
+
+  .page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: -20%;
+    width: 70%;
+    height: 100%;
+    background-image: url('/bjj/francobw.jpg');
+    background-size: cover;
+    background-position: top left;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.08;
   }
 
   .container {
@@ -423,6 +432,10 @@ const renderedClasses = await Promise.all(
 
   /* Mobile styles */
   @media (max-width: 768px) {
+    .page::before {
+      display: none;
+    }
+
     .page {
       padding-top: 48px;
       padding-bottom: 48px;
