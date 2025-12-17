@@ -1,0 +1,232 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Feedback - BJJ Classes">
+  <div class="page">
+    <div class="container">
+      <header class="header">
+        <a href="/bjj/" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back to classes
+        </a>
+      </header>
+      
+      <main class="content">
+        <h1 class="title">Give feedback</h1>
+        <p class="description">I’m always looking to improve the classes. 
+          <br>Share your feedback with me — it can be completely anonymous.</p>
+        
+        <form class="feedback-form" id="feedbackForm" action="https://formspree.io/f/mojaaaze" method="POST">
+          <div class="form-group">
+            <label for="name">Name (optional)</label>
+            <input type="text" id="name" name="name" placeholder="Your name" />
+          </div>
+          
+          <div class="form-group">
+            <label for="feedback">Your feedback <span class="required">*</span></label>
+            <textarea id="feedback" name="feedback" rows="6" placeholder="What you're enjoying, what you'd change, what you'd like more of..." required></textarea>
+          </div>
+          
+          <button type="submit" class="submit-button">Send feedback</button>
+        </form>
+        
+        <div class="success-message" id="successMessage">
+          <p>Thank you for your feedback!</p>
+        </div>
+      </main>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const form = document.getElementById('feedbackForm') as HTMLFormElement;
+  const successMessage = document.getElementById('successMessage');
+  const submitButton = form?.querySelector('.submit-button') as HTMLButtonElement;
+  
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Disable button and show loading state
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending...';
+    }
+    
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        form.style.display = 'none';
+        if (successMessage) {
+          successMessage.style.display = 'block';
+        }
+      } else {
+        throw new Error('Form submission failed');
+      }
+    } catch (error) {
+      // Re-enable button on error
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Send feedback';
+      }
+      alert('There was an error sending your feedback. Please try again.');
+    }
+  });
+</script>
+
+<style>
+  .page {
+    min-height: 100vh;
+    padding: 80px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .header {
+    margin-bottom: 48px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--grey-100);
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: var(--grey-300);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--grey-300);
+    margin: 0;
+  }
+
+  .description {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--grey-100);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--grey-200);
+  }
+
+  .required {
+    color: #c44;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    padding: 16px;
+    border: 1px solid #ededed;
+    border-radius: 4px;
+    background-color: var(--white);
+    color: var(--grey-300);
+    transition: border-color 0.2s ease;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--grey-100);
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: var(--grey-50);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .submit-button {
+    background-color: var(--grey-300);
+    padding: 16px 24px;
+    border-radius: 4px;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--white);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    align-self: flex-start;
+  }
+
+  .submit-button:hover {
+    opacity: 0.8;
+  }
+
+  .success-message {
+    display: none;
+    padding: 24px;
+    background-color: #e8f5e9;
+    border-radius: 4px;
+    margin-top: 16px;
+  }
+
+  .success-message p {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: #2e7d32;
+    margin: 0;
+  }
+
+  /* Mobile styles */
+  @media (max-width: 768px) {
+    .page {
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+  }
+</style>
+

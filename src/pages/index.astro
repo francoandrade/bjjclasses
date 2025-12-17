@@ -24,6 +24,7 @@ const renderedClasses = await Promise.all(
     <div class="container">
       <header class="header">
         <img src="/bjj/logo.svg" alt="BJJ Classes - Franco Andrade" class="logo" />
+        <a href="/bjj/feedback" class="feedback-button">Give feedback</a>
       </header>
       
       <div class="posts">
@@ -183,12 +184,31 @@ const renderedClasses = await Promise.all(
   }
 
   .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 88px;
   }
 
   .logo {
     width: 191px;
     height: auto;
+  }
+
+  .feedback-button {
+    background-color: #ededed;
+    padding: 16px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--grey-200);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+  }
+
+  .feedback-button:hover {
+    opacity: 0.6;
   }
 
   .posts {
